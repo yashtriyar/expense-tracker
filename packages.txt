@@ -1,0 +1,3 @@
+# System packages installed by Streamlit Cloud before pip install.
+# SQLite is built into Python's stdlib so no apt package needed.
+# Add any system-level deps here if you extend the app (e.g. libpq-dev for postgres).

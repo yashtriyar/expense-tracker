@@ -1,0 +1,47 @@
+# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+
+# ── Virtual environments ─────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Database ─────────────────────────────────────────────
+# Commit the empty placeholder but never the real DB file.
+*.db
+*.sqlite
+*.sqlite3
+# Exception: keep the placeholder file
+!expenses_placeholder.db.keep
+
+# ── Streamlit ────────────────────────────────────────────
+.streamlit/secrets.toml
+
+# ── IDE / OS ─────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ── Distribution / packaging ──────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+
+# ── Testing / coverage ────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Misc ─────────────────────────────────────────────────
+*.log
+.env
