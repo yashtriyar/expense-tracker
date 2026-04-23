@@ -332,31 +332,64 @@ st.markdown(summary_label)
 if not expenses:
     st.info("No expenses found. Add one above!")
 else:
-    import pandas as pd
+    # ── Table header ──────────────────────────────────────────────────────
+    hcol1, hcol2, hcol3, hcol4, hcol5 = st.columns([1.2, 1.5, 3, 1.2, 0.6])
+    hcol1.markdown("**Date**")
+    hcol2.markdown("**Category**")
+    hcol3.markdown("**Description**")
+    hcol4.markdown("**Amount**")
+    hcol5.markdown("**Del**")
+    st.markdown("<hr style='margin:4px 0 8px 0;border-color:#ddd8d0;'>", unsafe_allow_html=True)
 
-    rows = [
-        {
-            "Date": e.date.strftime("%d %b %Y"),
-            "Category": e.category,
-            "Description": e.description or "—",
-            # Render as a formatted string — never convert Decimal to float.
-            "Amount (₹)": f"₹{e.amount:,.2f}",
-        }
-        for e in expenses
-    ]
+    # ── One row per expense ───────────────────────────────────────────────
+    for expense in expenses:
+        col1, col2, col3, col4, col5 = st.columns([1.2, 1.5, 3, 1.2, 0.6])
 
-    df = pd.DataFrame(rows)
+        col1.markdown(expense.date.strftime("%d %b %Y"))
+        col2.markdown(expense.category)
+        col3.markdown(expense.description or "—")
+        col4.markdown(f"₹{expense.amount:,.2f}")
 
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True,
-        column_config={
-            "Amount (₹)": st.column_config.TextColumn(width="small"),
-            "Date": st.column_config.TextColumn(width="small"),
-            "Category": st.column_config.TextColumn(width="medium"),
-        },
-    )
+        # Delete button — uses expense.id as a unique key so each row
+        # gets its own independent button state.
+        if col5.button("🗑️", key=f"del_{expense.id}", help="Delete this expense"):
+            # Store the id that was clicked; confirmation happens below.
+            st.session_state["pending_delete_id"] = expense.id
+            st.session_state["pending_delete_desc"] = (
+                expense.description or expense.category
+            )
+
+    # ── Confirmation dialog ───────────────────────────────────────────────
+    # Renders below the list only when a delete button has been clicked.
+    if "pending_delete_id" in st.session_state:
+        st.markdown("---")
+        st.warning(
+            f"⚠️ Delete **\"{st.session_state['pending_delete_desc']}\"**? "
+            "This cannot be undone."
+        )
+        confirm_col, cancel_col, _ = st.columns([1, 1, 4])
+
+        if confirm_col.button("✅ Yes, delete", key="confirm_delete"):
+            db = SessionLocal()
+            try:
+                deleted = crud.delete_expense(db, st.session_state["pending_delete_id"])
+            finally:
+                db.close()
+
+            if deleted:
+                st.success("🗑️ Expense deleted.")
+            else:
+                st.error("Could not find that expense — it may have already been deleted.")
+
+            # Clear the pending state and refresh the page.
+            del st.session_state["pending_delete_id"]
+            del st.session_state["pending_delete_desc"]
+            st.rerun()
+
+        if cancel_col.button("❌ Cancel", key="cancel_delete"):
+            del st.session_state["pending_delete_id"]
+            del st.session_state["pending_delete_desc"]
+            st.rerun()
 
 # ---------------------------------------------------------------------------
 # Footer
