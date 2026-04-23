@@ -15,10 +15,6 @@ Working Url - https://expense-tracker-3r.streamlit.app/
 
 ---
 
-
-
----
-
 ## How to Run
 
 ```bash
